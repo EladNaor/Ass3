@@ -16,8 +16,7 @@ public class Packet {
 	private boolean addedOrDeleted;
 	//only for DATA packet
 	private byte[] Data; 
-	//Only for the ERROR packet
-	private short numOfErr;
+
 	
 
 	//Client requests to read from server
@@ -68,10 +67,10 @@ public class Packet {
 		this.endByte=false;
 	}
 	
-	public void createERRORpacket(){
+	public void createERRORpacket(int errType){
 		this.opcode = 5;
 		this.endByte = true;
-		switch(this.numOfErr){
+		switch(errType){
 			case 0: this.string= "Not defined";
 			break;
 			case 1: this.string= "File not found";
