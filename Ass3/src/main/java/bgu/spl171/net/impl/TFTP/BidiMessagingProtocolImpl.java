@@ -43,8 +43,8 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 				Path path = Paths.get(message.getString());
 				rawData = Files.readAllBytes(path);
 			} catch (IOException e) {
-				pack.createERRORpacket(1);
-				this.connections.send(this.connectionId, pack);
+				pack.createERRORpacket((short)1,"1");
+				connections.send(this.connectionId, pack);
 			}
 			if(rawData.length <= 512){
 				pack.createDATApacket((short) rawData.length, (short) 1, rawData);
@@ -58,7 +58,7 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 		case 2:
 			File file = new File(message.getString());
 			if(file.exists()){
-				pack.createERRORpacket(5);
+				pack.createERRORpacket((short)5,"5");
 				this.connections.send(this.connectionId, pack);
 			}
 			pack.createACKpacket((short) 0);
@@ -69,7 +69,7 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 			
 		case 4:
 			if(!(message.getBlockNumber() == this.countOfblockExpected)){
-				pack.createERRORpacket(1);
+				pack.createERRORpacket((short)1,"1");
 			}
 			
 		case 5: //TODO what to do when client sends an error

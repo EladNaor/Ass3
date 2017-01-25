@@ -31,6 +31,8 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
     private byte[] bytesOfErrorCode = new byte[2];
 
 
+
+
     public void errorInit(){
         k=0;
         bytesOfErrorCode = new byte[2];
@@ -130,11 +132,26 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
                             p = new Packet();
                             p.createDATApacket(packetSize, blockNumber, data);
                             dataInit();
+                            opCode=0;
                             return p;
-
                         }
                         return null;
                     }
+                }
+            }
+
+            case 4:{
+                if(k==0 || k==1) {
+                    bytesOfBlockNumber[k] = nextByte;
+                    k++;
+                    if(k==2){
+                        blockNumber=bytesToShort(bytesOfBlockNumber);
+                        p=new Packet();
+                        p.createACKpacket(blockNumber);
+                        opCode=0;
+                        return p;
+                    }
+                    return null;
                 }
             }
 
@@ -157,7 +174,6 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
                     p=new Packet();
                     p.createERRORpacket(errCode,errMsg);
                     opCode=0;
-                    init();
                     errorInit();
                     return p;
                 }

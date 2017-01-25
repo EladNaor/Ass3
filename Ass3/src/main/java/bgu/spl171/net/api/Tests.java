@@ -13,15 +13,19 @@ public class Tests {
 
     public static void main (String []args){
         // log request test
+        ACKTest ();
        // LOGRQtest();
+      //  DATAtest ();
+      //  ERRORtest ();
       //  DELRQtest();
       //  WRQTest ();
       //  RRQTest ();
-     //   DISCTest ();
-       // ACKTest ();
-       // DIRQtest ();
-        DATAtest ();
-        ERRORtest ();
+      //  DISCTest ();
+
+      //  DIRQtest ();
+
+
+
     }
 
     private static void ERRORtest() {
@@ -75,7 +79,7 @@ public class Tests {
         for (int i = 0 ; i < 4 ; i++){
             tmp = p.decodeNextByte(bytes[i]);
         }
-        System.out.println(tmp.getOpCode()== 4);
+        System.out.println(tmp.getOpCode()== 4 && tmp.getBlockNumber()==0);
     }
 
     private static void DISCTest() {
