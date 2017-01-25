@@ -14,16 +14,20 @@ public class Tests {
     public static void main (String []args){
         // log request test
         ACKTest ();
-       // LOGRQtest();
-      //  DATAtest ();
-      //  ERRORtest ();
-      //  DELRQtest();
-      //  WRQTest ();
-      //  RRQTest ();
-      //  DISCTest ();
-
-      //  DIRQtest ();
-
+        LOGRQtest();
+        DATAtest ();
+        ERRORtest ();
+        DELRQtest();
+        WRQTest ();
+        RRQTest ();
+        DISCTest ();
+        DIRQtest ();
+        RRQTest ();
+        ACKTest ();
+        DELRQtest();
+        DIRQtest ();
+        WRQTest ();
+        ERRORtest ();
 
 
     }

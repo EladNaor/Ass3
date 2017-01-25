@@ -149,6 +149,7 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
                         p=new Packet();
                         p.createACKpacket(blockNumber);
                         opCode=0;
+                        errorInit();
                         return p;
                     }
                     return null;
