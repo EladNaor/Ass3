@@ -63,7 +63,9 @@ public class Packet {
 		this.opcode=3;
 		this.packetSize=packetSize;
 		this.blockNumber=blockNumber;
-		this.data=data;
+		this.data = new byte[data.length];
+		for(int i=0; i<this.data.length; i++)
+			this.data[i]=data[i];
 		this.endByte = true;
 	}
 	
@@ -147,8 +149,20 @@ public class Packet {
 	public short getPacketSize(){
 		return this.packetSize;
 	}
-	
-	
-	
+
+	public byte[] getData(){
+		return this.data;
+	}
+
+	public short getErrCode(){
+		return this.errCode;
+	}
+
+	public boolean getAddedOrDeleted(){
+		return this.addedOrDeleted;
+	}
+
+
+
 }
 
