@@ -15,7 +15,6 @@ public class Packet {
 	//only for BCAST packet
 	private boolean addedOrDeleted;
 	//only for DATA packet
-	private byte[] Data;
 	private byte[] data;
 	private short packetSize;
 	//only for ERROR packet
@@ -145,7 +144,9 @@ public class Packet {
 	public short getBlockNumber(){
 		return this.blockNumber;
 	}
-
+	public short getPacketSize(){
+		return this.packetSize;
+	}
 	
 	
 	

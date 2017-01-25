@@ -13,21 +13,21 @@ public class Tests {
 
     public static void main (String []args){
         // log request test
-        ACKTest ();
+       // ACKTest ();
         LOGRQtest();
-        DATAtest ();
-        ERRORtest ();
-        DELRQtest();
+//        DATAtest ();
+//        ERRORtest ();
+//        DELRQtest();
         WRQTest ();
-        RRQTest ();
-        DISCTest ();
-        DIRQtest ();
-        RRQTest ();
-        ACKTest ();
-        DELRQtest();
-        DIRQtest ();
-        WRQTest ();
-        ERRORtest ();
+//        RRQTest ();
+//        DISCTest ();
+//        DIRQtest ();
+//        RRQTest ();
+//        ACKTest ();
+//        DELRQtest();
+//        DIRQtest ();
+//        WRQTest ();
+//        ERRORtest ();
 
 
     }
@@ -76,14 +76,24 @@ public class Tests {
     }
 
     private static void ACKTest() {
-        Packet tmp = null;
-        byte[] Opcode = MessageEncDec.shortToBytes((short) 4);
-        byte[] block = MessageEncDec.shortToBytes((short) 0);
-        byte[] bytes = new byte[] {Opcode[0] , Opcode[1] , block[0] , block[1]};
-        for (int i = 0 ; i < 4 ; i++){
-            tmp = p.decodeNextByte(bytes[i]);
+//        Packet tmp = null;
+//        byte[] Opcode = MessageEncDec.shortToBytes((short) 4);
+//        byte[] block = MessageEncDec.shortToBytes((short) 0);
+//        byte[] bytes = new byte[] {Opcode[0] , Opcode[1] , block[0] , block[1]};
+//        for (int i = 0 ; i < 4 ; i++){
+//            tmp = p.decodeNextByte(bytes[i]);
+//        }
+//
+        Packet pp = new Packet();
+        Packet pp2 = new Packet();
+        pp.createACKpacket((short) 0);
+        byte[] aaa = p.encode(pp);
+        for (int i = 0; i < aaa.length; i++) {
+            pp2 = p.decodeNextByte(aaa[i]);
         }
-        System.out.println(tmp.getOpCode()== 4 && tmp.getBlockNumber()==0);
+
+        System.out.println(pp.getOpCode()== pp2.getOpCode() && pp.getBlockNumber()==pp2.getBlockNumber());
+//        System.out.println(tmp.getOpCode()== 4 && tmp.getBlockNumber()==0);
     }
 
     private static void DISCTest() {
@@ -114,21 +124,30 @@ public class Tests {
     }
 
     private static void WRQTest() {
-        Packet tmp = null;
-        String fileName = "chocolate_or_strongberry";
-        byte[] name = (fileName + '\0').getBytes();
-        byte[] Opcode = MessageEncDec.shortToBytes((short) 2);
-        byte[] bytes = new byte[2 + name.length];
-        bytes[0] = Opcode[0] ; bytes[1] = Opcode[1];
-        for (int i = 2 ; i < bytes.length ; i++){
-            bytes[i] = name[i-2];
-        }
+//        Packet tmp = null;
+//        String fileName = "chocolate_or_strongberry";
+//        byte[] name = (fileName + '\0').getBytes();
+//        byte[] Opcode = MessageEncDec.shortToBytes((short) 2);
+//        byte[] bytes = new byte[2 + name.length];
+//        bytes[0] = Opcode[0] ; bytes[1] = Opcode[1];
+//        for (int i = 2 ; i < bytes.length ; i++){
+//            bytes[i] = name[i-2];
+//        }
+//
+//        for (int i = 0 ; i < bytes.length ; i++){
+//            tmp = p.decodeNextByte(bytes[i]);
+//        }
+//
+//        System.out.println(tmp .getOpCode() ==  2 && tmp.getString().equals(fileName));
 
-        for (int i = 0 ; i < bytes.length ; i++){
-            tmp = p.decodeNextByte(bytes[i]);
+        Packet pp = new Packet();
+        Packet pp2 = new Packet();
+        pp.createWRQpacket("WritePacket");
+        byte[] aaa = p.encode(pp);
+        for (int i = 0; i < aaa.length; i++) {
+            pp2 = p.decodeNextByte(aaa[i]);
         }
-
-        System.out.println(tmp .getOpCode() ==  2 && tmp.getString().equals(fileName));
+        System.out.println(pp.getOpCode()== pp2.getOpCode() && pp.getString().equals(pp2.getString()));
     }
 
     private static void DELRQtest() {
@@ -151,22 +170,32 @@ public class Tests {
 
 
     private static void LOGRQtest() {
-        MessageEncDec p = new MessageEncDec();
-        Packet tmp = null;
-        String nickName = "Spl_Took_My_Life";
-        byte[] name = (nickName + '\0').getBytes();
-        byte[] Opcode = MessageEncDec.shortToBytes((short)7);
-        byte[] bytes = new byte [2 + name.length];
-        bytes[0] = Opcode[0] ; bytes [1] = Opcode[1];
-        for (int i = 2 ; i < bytes.length ; i++){
-            bytes[i] = name[i-2];
+//        MessageEncDec p = new MessageEncDec();
+//        Packet tmp = null;
+//        String nickName = "Spl_Took_My_Life";
+//        byte[] name = (nickName + '\0').getBytes();
+//        byte[] Opcode = MessageEncDec.shortToBytes((short)7);
+//        byte[] bytes = new byte [2 + name.length];
+//        bytes[0] = Opcode[0] ; bytes [1] = Opcode[1];
+//        for (int i = 2 ; i < bytes.length ; i++){
+//            bytes[i] = name[i-2];
+//        }
+//
+//        for (int i = 0 ; i < bytes.length ; i++){
+//            tmp = p.decodeNextByte(bytes[i]);
+//        }
+//        System.out.println(tmp.getOpCode()==7 && tmp.getString().equals(nickName));\
+
+        Packet pp = new Packet();
+        Packet pp2 = new Packet();
+        pp.createLOGRQpacket("login nickname");
+        byte[] aaa = p.encode(pp);
+        for (int i = 0; i < aaa.length; i++) {
+            pp2 = p.decodeNextByte(aaa[i]);
         }
 
-        for (int i = 0 ; i < bytes.length ; i++){
-            tmp = p.decodeNextByte(bytes[i]);
-        }
+        System.out.println(pp.getOpCode()== pp2.getOpCode() && pp.getString().equals(pp2.getString()));
 
-        System.out.println(tmp.getOpCode()==7 && tmp.getString().equals(nickName));
 
     }
 }
