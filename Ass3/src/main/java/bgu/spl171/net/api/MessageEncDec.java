@@ -2,12 +2,14 @@ package bgu.spl171.net.api;
 
 import bgu.spl171.net.api.MessageEncoderDecoder;
 import bgu.spl171.net.impl.packet.Packet;
+
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
 /**
  * Created by Dor on 1/25/2017.
  */
-public class MessageEncDec implements MessageEncoderDecoder {
+public class MessageEncDec implements MessageEncoderDecoder<Packet> {
 
     Packet p=null;
     short opCode=0;
@@ -17,7 +19,7 @@ public class MessageEncDec implements MessageEncoderDecoder {
 
 
     @Override
-    public Object decodeNextByte(byte nextByte) {
+    public Packet decodeNextByte(byte nextByte) {
         if(opCode==0){
             bytesOfOpCode[i]=nextByte;
             i++;
@@ -29,36 +31,38 @@ public class MessageEncDec implements MessageEncoderDecoder {
         switch (opCode){
             case 7:{
                 if(byteBuffer==null)
-                    byteBuffer.allocate(512);
+                    byteBuffer = ByteBuffer.allocate(512);
                 if(nextByte!=0) {
                     byteBuffer.put(nextByte);
                     return null;
                 }
                 else {
-                    char[] userNameChar = byteBufferToChar(byteBuffer);
-                    String userNameString="";
-                    for(int i=0; i<userNameChar.length; i++)
-                        userNameString+=userNameChar[i];
-                    p.createLOGRQpacket(userNameString);
+                    String userName = byteBufferToChar(byteBuffer);
+                    p=new Packet();
+                    p.createLOGRQpacket(userName);
                     return p;
                 }
             }
         }
-
-
         return null;
     }
 
-    private char[] byteBufferToChar(ByteBuffer byteBuffer){
+    private String byteBufferToChar(ByteBuffer byteBuffer){
         byteBuffer.flip();
-        char[] ans=new char[byteBuffer.limit()];
-        for(int i=0; i<ans.length; i++)
-            ans[i]=byteBuffer.getChar();
+        byte[] username=new byte[byteBuffer.limit()];
+        for(int i=0; i<username.length; i++)
+            username[i]=byteBuffer.get(i);
+        String ans= null;
+        try {
+            ans = new String(username,"UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         return ans;
     }
 
     @Override
-    public byte[] encode(Object message) {
+    public byte[] encode(Packet message) {
         return new byte[0];
     }
 
@@ -69,7 +73,7 @@ public class MessageEncDec implements MessageEncoderDecoder {
         return result;
     }
 
-    public byte[] shortToBytes(short num)
+    public static byte[] shortToBytes(short num)
     {
         byte[] bytesArr = new byte[2];
         bytesArr[0] = (byte)((num >> 8) & 0xFF);
