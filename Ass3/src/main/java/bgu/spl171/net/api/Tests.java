@@ -13,14 +13,14 @@ public class Tests {
 
     public static void main (String []args){
         // log request test
-          LOGRQtest();
-           DELRQtest();
-            WRQTest ();
-           RRQTest ();
+       //   LOGRQtest();
+        //   DELRQtest();
+       //    WRQTest ();
+        //   RRQTest ();
         //DISCTest ();
        // ACKTest ();
-      //  DIRQtest ();
-     // DATAtest ();
+       //DIRQtest ();
+      DATAtest ();
       //  ERRORtest ();
     }
 
@@ -53,7 +53,7 @@ public class Tests {
             tmp = p.decodeNextByte(bytes[i]);
         }
 
-        System.out.println(tmp .getOpCode() == 3);
+        System.out.println(tmp .getOpCode() == 3 );
     }
 
     private static void DIRQtest() {

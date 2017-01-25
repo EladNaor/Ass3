@@ -39,7 +39,7 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 				pack.createERRORpacket(1);
 				this.connections.send(this.connectionId, pack);
 			}
-			pack.createDATApacket(data);
+			//pack.createDATApacket((short)data.length,data);
 			this.connections.send(this.connectionId, pack);
 			break;
 			

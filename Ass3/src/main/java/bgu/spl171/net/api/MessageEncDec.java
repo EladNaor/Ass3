@@ -16,11 +16,29 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
     private int i=0;
     private ByteBuffer byteBuffer;
 
+    //For DATA Paackets:
+    private int j=0;
+    private int counter=0;
+    private short packetSize;
+    private short blockNumber;
+    private byte[] bytesOfDataPacketSize = new byte[2];
+    private byte[] bytesOfBlockNumber = new byte[2];
+    private byte[] data=new byte[512];
+
+
     public void init(){
         p=null;
         bytesOfOpCode = new byte[2];
         i=0;
         byteBuffer = ByteBuffer.allocate(512);
+    }
+
+    public void dataInit(){
+        int j=0;
+        int counter=0;
+        bytesOfDataPacketSize = new byte[2];
+        bytesOfBlockNumber = new byte[2];
+        data=new byte[512];
     }
     @Override
     public Packet decodeNextByte(byte nextByte) {
@@ -30,9 +48,16 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
             if(i==2) {
                 opCode = bytesToShort(bytesOfOpCode);
                 init();
+
+                if(opCode==6){
+                    p=new Packet();
+                    p.createDIRQpacket();
+                    return p;
+                }
             }
             return null;
         }
+
         switch (opCode){
             case 1: {
                 if (nextByte != 0) {
@@ -62,8 +87,37 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
                 }
             }
 
-            case 6:{
+            case 3: {
+                if (j < 4) {
+                    if (j == 0 || j == 1) {
+                        bytesOfDataPacketSize[j] = nextByte;
+                        j++;
+                        return null;
+                    }
+                    if (j == 2 || j == 3) {
+                        bytesOfBlockNumber[j - 2] = nextByte;
+                        if (j == 3) {
+                            packetSize = bytesToShort(bytesOfDataPacketSize);
+                            blockNumber = bytesToShort(bytesOfBlockNumber);
+                        }
+                        j++;
+                        return null;
+                    }
+                } else {
+                    if (j - 4 <= packetSize) {
+                        data[j - 4] = nextByte;
+                        j++;
 
+                        if (j - 4 == packetSize) {
+                            p = new Packet();
+                            p.createDATApacket(packetSize, blockNumber, data);
+                            dataInit();
+                            return p;
+
+                        }
+                        return null;
+                    }
+                }
             }
 
             case 7:{

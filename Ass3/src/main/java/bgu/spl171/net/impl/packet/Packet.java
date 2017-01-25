@@ -15,7 +15,8 @@ public class Packet {
 	//only for BCAST packet
 	private boolean addedOrDeleted;
 	//only for DATA packet
-	private byte[] Data; 
+	private byte[] data;
+	private short packetSize;
 
 	
 
@@ -56,8 +57,11 @@ public class Packet {
 		this.endByte = true;
 	}
 	
-	public void createDATApacket(byte[] data){
-		//TODO: think how to divide into blocks
+	public void createDATApacket(short packetSize, short blockNumber, byte[] data){
+		this.opcode=3;
+		this.packetSize=packetSize;
+		this.blockNumber=blockNumber;
+		this.data=data;
 		this.endByte = true;
 	}
 	
@@ -75,22 +79,22 @@ public class Packet {
 			break;
 			case 1: this.string= "File not found";
 			break;
-			case 2: this.string= "Access violation – File cannot be written, read or deleted";
+			case 2: this.string= "Access violation ï¿½ File cannot be written, read or deleted";
 			break;
-			case 3: this.string= "Disk full or allocation exceeded – No room in disk";
+			case 3: this.string= "Disk full or allocation exceeded ï¿½ No room in disk";
 			break;
-			case 4: this.string= "Illegal TFTP operation – Unknown Opcode";
+			case 4: this.string= "Illegal TFTP operation ï¿½ Unknown Opcode";
 			break;
-			case 5: this.string= "File already exists – File name exists on WRQ";
+			case 5: this.string= "File already exists ï¿½ File name exists on WRQ";
 			break;
-			case 6: this.string= "User not logged in – Any opcode received before Login completes";
+			case 6: this.string= "User not logged in ï¿½ Any opcode received before Login completes";
 			break;
-			case 7: this.string= "User already logged in – Login username already connected";
+			case 7: this.string= "User already logged in ï¿½ Login username already connected";
 			break;
 		}
 	}
 	
-	public void createDIRQpacket(String username){
+	public void createDIRQpacket(){
 		this.opcode = 6;
 		this.endByte = false;
 	}
