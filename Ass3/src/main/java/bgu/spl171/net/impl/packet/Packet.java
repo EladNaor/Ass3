@@ -44,32 +44,31 @@ public class Packet {
 	//maximum size of a single data sent through the DATA packet
 	private static final int MaxDataBlockByteSize =512;
 	
-
 	
-	private void createRRQpacket(String filename){
+	public void createRRQpacket(String filename){
 		this.opcode = 1;
 		this.string = filename;
 		this.endByte = true;
 	}
 	
-	private void createWRQpacket(String filename){
+	public void createWRQpacket(String filename){
 		this.opcode = 2;
 		this.string = filename;
 		this.endByte = true;
 	}
 	
-	private void createDATApacket(byte[] data){
+	public void createDATApacket(byte[] data){
 		//TODO: think how to divide into blocks
 		this.endByte = true;
 	}
 	
-	private void createACKpacket(short numOfBlocks){
+	public void createACKpacket(short numOfBlocks){
 		this.opcode = 4;
 		this.blockNumber = numOfBlocks;
 		this.endByte=false;
 	}
 	
-	private void createERRORpacket(){
+	public void createERRORpacket(){
 		this.opcode = 5;
 		this.endByte = true;
 		switch(this.numOfErr){
@@ -92,32 +91,32 @@ public class Packet {
 		}
 	}
 	
-	private void createDIRQpacket(String username){
+	public void createDIRQpacket(String username){
 		this.opcode = 6;
 		this.endByte = false;
 	}
 	
-	private void createLOGRQpacket(String username){
+	public void createLOGRQpacket(String username){
 		this.opcode = 7;
 		this.string = username;
 		this.endByte = true;
 	}
 	
-	private void createDELRQpacket(String filename){
+	public void createDELRQpacket(String filename){
 		this.opcode = 8;
 		this.string = filename;
 		this.endByte = true;
 		
 	}
 	
-	private void createBCASTpacket(boolean isAdded, String filename){
+	public void createBCASTpacket(boolean isAdded, String filename){
 		this.opcode = 9;
 		this.string= filename;
 		this.addedOrDeleted = isAdded;
 		this.endByte = true;
 	}
 	
-	private void createDISCpacket(String username){
+	public void createDISCpacket(String username){
 		this.opcode = 10;
 		this.endByte = false;
 	}
@@ -125,6 +124,14 @@ public class Packet {
 	
 	public void send(){
 		//TODO: send packet
+	}
+
+	public short getOpCode() {
+		return this.opcode;
+	}
+
+	public String getString() {
+		return this.string;
 	}
 	
 	
