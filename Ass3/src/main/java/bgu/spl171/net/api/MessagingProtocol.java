@@ -1,6 +1,6 @@
 package bgu.spl171.net.api;
 
-public interface MessagingProtocol<T> {
+public interface    MessagingProtocol<T> {
  
     /**
      * process the given message 
