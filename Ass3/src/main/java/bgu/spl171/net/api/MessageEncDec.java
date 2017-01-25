@@ -43,6 +43,21 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
                     return p;
                 }
             }
+            case 8:{
+                if(byteBuffer==null)
+                    byteBuffer = ByteBuffer.allocate(512);
+                if(nextByte!=0) {
+                    byteBuffer.put(nextByte);
+                    return null;
+                }
+                else{
+                    String fileName = byteBufferToChar(byteBuffer);
+                    p=new Packet();
+                    p.createDELRQpacket(fileName);
+                    return p;
+                }
+            }
+
         }
         return null;
     }
