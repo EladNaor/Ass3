@@ -17,6 +17,9 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 	private int connectionId;
 	private Connections connections;
 	private ConnectionHandler<Packet> handler;
+	
+	private int acion = 0; 
+	private 
 
 	@Override
 	public void start(int connectionId, Connections connections) {
@@ -51,10 +54,13 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 			}
 			pack.createACKpacket((short) 0);
 			this.connections.send(this.connectionId, pack);
-		}
-
-		
-		
+			isWriting = true;
+			
+		case 3:
+			
+		case 4:
+			
+			
 		}
 
 	@Override
