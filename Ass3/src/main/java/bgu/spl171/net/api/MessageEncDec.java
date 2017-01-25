@@ -1,6 +1,5 @@
 package bgu.spl171.net.api;
 
-import bgu.spl171.net.api.MessageEncoderDecoder;
 import bgu.spl171.net.impl.packet.Packet;
 
 import java.io.UnsupportedEncodingException;

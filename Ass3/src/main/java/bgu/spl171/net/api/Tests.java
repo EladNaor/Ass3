@@ -1,6 +1,5 @@
 package bgu.spl171.net.api;
 import bgu.spl171.net.impl.packet.Packet;
-import bgu.spl171.net.api.MessageEncDec;
 
 import java.util.Date;
 import java.util.Random;
