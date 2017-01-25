@@ -15,7 +15,7 @@ public class Packet {
 	//only for BCAST packet
 	private boolean addedOrDeleted;
 	//only for DATA packet
-	private byte[] Data; 
+	private byte[] Data;
 
 	
 
@@ -133,6 +133,10 @@ public class Packet {
 		return this.string;
 	}
 	
+	public short getBlockNumber(){
+		return this.blockNumber;
+	}
+
 	
 	
 	
