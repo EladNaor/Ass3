@@ -10,11 +10,13 @@ import bgu.spl171.net.srv.bidi.ConnectionHandler;
 public class ConnectionsImpl<T> implements Connections<T> {
 	
 	private HashMap<Integer, ConnectionHandler<T>> connectionsIdMap;
+	private HashMap<Integer, ConnectionHandler<T>> logedInUsersMap;
 	private int lastIdGiven = 0;
 	
 	
 	public ConnectionsImpl() {
 		this.connectionsIdMap = new HashMap<>();
+		this.logedInUsersMap = new HashMap<>();
 	}
 
 	@Override

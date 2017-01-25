@@ -15,12 +15,9 @@ public class Packet {
 	//only for BCAST packet
 	private boolean addedOrDeleted;
 	//only for DATA packet
-<<<<<<< HEAD
 	private byte[] Data;
-=======
 	private byte[] data;
 	private short packetSize;
->>>>>>> branch 'master' of https://github.com/EladNaor/Ass3
 
 	
 
