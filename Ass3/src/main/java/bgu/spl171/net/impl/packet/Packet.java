@@ -17,6 +17,8 @@ public class Packet {
 	//only for DATA packet
 	private byte[] data;
 	private short packetSize;
+	//only for ERROR packet
+	private short errCode;
 
 	
 
@@ -70,11 +72,13 @@ public class Packet {
 		this.blockNumber = numOfBlocks;
 		this.endByte=false;
 	}
-	
-	public void createERRORpacket(int errType){
+
+	public void createERRORpacket(short errCode, String errMsg ){
 		this.opcode = 5;
 		this.endByte = true;
-		switch(errType){
+		this.errCode=errCode;
+		this.string=errMsg;
+		/* switch(errType){
 			case 0: this.string= "Not defined";
 			break;
 			case 1: this.string= "File not found";
@@ -91,9 +95,9 @@ public class Packet {
 			break;
 			case 7: this.string= "User already logged in � Login username already connected";
 			break;
-		}
+		}*/
 	}
-	
+
 	public void createDIRQpacket(){
 		this.opcode = 6;
 		this.endByte = false;
@@ -119,7 +123,7 @@ public class Packet {
 		this.endByte = true;
 	}
 	
-	public void createDISCpacket(String username){
+	public void createDISCpacket(){
 		this.opcode = 10;
 		this.endByte = false;
 	}

@@ -16,7 +16,7 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
     private int i=0;
     private ByteBuffer byteBuffer;
 
-    //For DATA Paackets:
+    //For DATA Packets:
     private int j=0;
     private int counter=0;
     private short packetSize;
@@ -25,6 +25,16 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
     private byte[] bytesOfBlockNumber = new byte[2];
     private byte[] data=new byte[512];
 
+    //for ERROR Packets
+    private int k=0;
+    private short errCode;
+    private byte[] bytesOfErrorCode = new byte[2];
+
+
+    public void errorInit(){
+        k=0;
+        bytesOfErrorCode = new byte[2];
+    }
 
     public void init(){
         p=null;
@@ -34,8 +44,8 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
     }
 
     public void dataInit(){
-        int j=0;
-        int counter=0;
+        j=0;
+        counter=0;
         bytesOfDataPacketSize = new byte[2];
         bytesOfBlockNumber = new byte[2];
         data=new byte[512];
@@ -50,9 +60,17 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
                 init();
 
                 if(opCode==6){
-                    p=new Packet();
-                    p.createDIRQpacket();
-                    return p;
+                    Packet p2=new Packet();
+                    p2.createDIRQpacket();
+                    opCode=0;
+                    return p2;
+                }
+
+                if(opCode==10){
+                    Packet p2=new Packet();
+                    p2.createDISCpacket();
+                    opCode=0;
+                    return p2;
                 }
             }
             return null;
@@ -104,11 +122,11 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
                         return null;
                     }
                 } else {
-                    if (j - 4 <= packetSize) {
-                        data[j - 4] = nextByte;
-                        j++;
+                    if (counter <= packetSize) {
+                        data[counter] = nextByte;
+                        counter++;
 
-                        if (j - 4 == packetSize) {
+                        if (counter == packetSize) {
                             p = new Packet();
                             p.createDATApacket(packetSize, blockNumber, data);
                             dataInit();
@@ -117,6 +135,31 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
                         }
                         return null;
                     }
+                }
+            }
+
+            case 5:{
+                if(k<2) {
+                    bytesOfErrorCode[k] = nextByte;
+                    k++;
+                    return null;
+                }
+                if(k==2) {
+                    errCode = bytesToShort(bytesOfErrorCode);
+                    k++;
+                }
+                if (nextByte != 0) {
+                    byteBuffer.put(nextByte);
+                    return null;
+                }
+                else{
+                    String errMsg = byteBufferToChar(byteBuffer);
+                    p=new Packet();
+                    p.createERRORpacket(errCode,errMsg);
+                    opCode=0;
+                    init();
+                    errorInit();
+                    return p;
                 }
             }
 

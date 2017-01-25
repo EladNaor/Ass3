@@ -13,35 +13,37 @@ public class Tests {
 
     public static void main (String []args){
         // log request test
-       //   LOGRQtest();
-        //   DELRQtest();
-       //    WRQTest ();
-        //   RRQTest ();
-        //DISCTest ();
+       // LOGRQtest();
+      //  DELRQtest();
+      //  WRQTest ();
+      //  RRQTest ();
+     //   DISCTest ();
        // ACKTest ();
-       //DIRQtest ();
-      DATAtest ();
-      //  ERRORtest ();
+       // DIRQtest ();
+        DATAtest ();
+        ERRORtest ();
     }
 
     private static void ERRORtest() {
         String expected = "Not defined";
+        byte[] asa = expected.getBytes();
         Packet tmp = null;
-        Packet er = new Packet();
-        er.createERRORpacket((short)0);
-        byte [] en = p.encode(er);
+        byte[] en = new byte[asa.length+5];
+        en[0]=0; en[1]=5; en[2]=0; en[3]=4; en[en.length-1]=0;
+        for (int i = 4 ; i < en.length-1 ; i++){
+            en[i] = asa[i-4];
+        }
         for (int i = 0 ; i < en.length ; i++){
             tmp = p.decodeNextByte(en[i]);
         }
-
-        System.out.println(tmp.getOpCode()==5);
+        System.out.println(tmp.getOpCode()==5 && tmp.getString().equals(expected));
     }
 
     private static void DATAtest() {
         Random rnd = new Random(new Date().getTime());
         Packet tmp = null;
-        byte[] size = MessageEncDec.shortToBytes((short)400);
         byte[] Opcode = MessageEncDec.shortToBytes((short) 3);
+        byte[] size = MessageEncDec.shortToBytes((short)400);
         byte[] block = MessageEncDec.shortToBytes((short) 7);
         byte[] bytes = new byte[6 + 400];
         bytes[0] = Opcode[0] ; bytes[1] = Opcode[1] ; bytes[2] =  size[0] ; bytes[3] = size[1] ;bytes[4] = block[0] ;bytes[5] = block[1];
