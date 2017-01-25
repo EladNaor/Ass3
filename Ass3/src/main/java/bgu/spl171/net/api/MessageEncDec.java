@@ -30,7 +30,8 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
     private short errCode;
     private byte[] bytesOfErrorCode = new byte[2];
 
-
+    //For Encoder
+    private byte[] ans;
 
 
     public void errorInit(){
@@ -229,7 +230,32 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
 
     @Override
     public byte[] encode(Packet message) {
-        return new byte[0];
+        byte[] opCodeBytes = shortToBytes(message.getOpCode());
+        switch(message.getOpCode()){
+            case 1: case 2: case 7: case 8: {
+                ans = new byte[message.getString().getBytes().length + 3];
+                ans[0] = opCodeBytes[0];
+                ans[1] = opCodeBytes[1];
+                ans[ans.length - 1] = 0;
+                byte[] string = message.getString().getBytes();
+                for (int i = 2; i < string.length + 2; i++)
+                    ans[i] = string[i - 2];
+                break;
+            }
+
+            case 6: case 10:{
+                ans=opCodeBytes;
+                break;
+            }
+
+            case 3:{
+                ans = new byte[message.getPacketSize()+ 3];
+
+            }
+        }
+
+
+        return ans;
     }
 
     public short bytesToShort(byte[] byteArr)
