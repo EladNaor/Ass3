@@ -19,10 +19,14 @@ import bgu.spl171.net.srv.bidi.ConnectionHandler;
 public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>{
 	private int connectionId;
 	private ConnectionHandler<Packet> handler;
-	private boolean isWriting = false; 
 	private short countOfblockExpected = 0;
 	private ConcurrentLinkedQueue<byte[]> devidedDataQueue;
-	private static HashMap<String, ConnectionHandler> logedInUsersMap;
+	private static HashMap<Integer, String> logedInUsersMap;
+	private static final File FilesDir = new File("./Files");
+	
+	//only options are: read, write, dirq, rest
+	private String action = "rest"; 
+
 	
 	private static Connections<Packet> connections;
 	
@@ -41,7 +45,7 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 		switch(opCode){
 		case 1:
 			try {
-				Path path = Paths.get(message.getString());
+				Path path = Paths.get(FilesDir+"/"+message.getString());
 				rawData = Files.readAllBytes(path);
 			} catch (IOException e) {
 				pack.createERRORpacket((short)1,"1");
@@ -64,13 +68,16 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 			}
 			pack.createACKpacket((short) 0);
 			this.connections.send(this.connectionId, pack);
-			this.isWriting = true;
+			break;
 			
 		case 3: // TODO understand what to do with data received
+			// also remember to BCAST int the end 
+
 			
 		case 4:
 			if(!(message.getBlockNumber() == this.countOfblockExpected)){
 				pack.createERRORpacket((short)1,"1");
+				break;
 			}
 			
 		case 5: //TODO what to do when client sends an error
@@ -94,11 +101,29 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 			connections.send(3,pack);
 
 		case 7:
-			
-			if(logedInUsersMap.containsValue(message.getString())){
-
+			String userName = message.getString();
+			if(logedInUsersMap.containsValue(userName)){
+				pack.createERRORpacket((short) 7, "7");
+				connections.send(connectionId, pack);
+			} else {
+				logedInUsersMap.put(this.connectionId, userName);
+				pack.createACKpacket((short) 0);
 			}
 		
+		case 8: 
+			Path path = Paths.get(FilesDir+"/"+message.getString());
+			if(!path.toFile().exists()){
+				pack.createERRORpacket((short)1,"1");
+				this.connections.send(this.connectionId, pack);
+			} else { 
+				path.toFile().delete();
+				pack.createBCASTpacket(false, message.getString());
+				connections.send(9, pack);
+			}
+			
+		case 10:
+			logedInUsersMap.remove(this.connectionId);
+			this.connections.disconnect(connectionId);
 		}
 	}
 

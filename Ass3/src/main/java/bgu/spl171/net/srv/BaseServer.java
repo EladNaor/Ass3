@@ -41,13 +41,13 @@ public abstract class BaseServer<T> implements Server<T> {
 
                 Socket clientSock = serverSock.accept();
 
-                BidiMessagingProtocol<T> BMessagingProtocol=protocolFactory.get();
+                BidiMessagingProtocol<T> bMessagingProtocol=protocolFactory.get();
                 BlockingConnectionHandler<T> handler = new BlockingConnectionHandler<>(
                         clientSock,
                         encdecFactory.get(),
-                        protocolFactory.get());
+                        bMessagingProtocol);
                 connections.addConnection(handler);
-                BMessagingProtocol.start(connections.getLastIdGiven(), connections);
+                bMessagingProtocol.start(connections.getLastIdGiven(), connections);
                 execute(handler);
             }
         } catch (IOException ex) {
