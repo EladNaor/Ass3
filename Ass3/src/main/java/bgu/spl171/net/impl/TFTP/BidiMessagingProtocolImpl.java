@@ -46,7 +46,11 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 				pack.createERRORpacket(1);
 				this.connections.send(this.connectionId, pack);
 			}
+<<<<<<< HEAD
 			pack.createDATApacket(rawData);
+=======
+			//pack.createDATApacket((short)data.length,data);
+>>>>>>> branch 'master' of https://github.com/EladNaor/Ass3
 			this.connections.send(this.connectionId, pack);
 			break;
 			
