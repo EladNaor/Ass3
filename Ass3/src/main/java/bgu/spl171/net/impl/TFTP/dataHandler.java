@@ -38,11 +38,6 @@ public class dataHandler {
 	public String getAction() {
 		return this.action;
 	}
-
-	public short getAndIncCountOfblockExpected() {
-		this.countOfblockExpected++;
-		return (short) (this.countOfblockExpected-1);
-	}
 	
 	protected void devideRawDataIntoBlocksAndSendFirst(byte[] rawData) {
 		int sumOfBlocks = (int) Math.ceil((rawData.length +1)/512);
@@ -66,6 +61,7 @@ public class dataHandler {
 		byte[] firstBlock = this.devidedDataQueue.poll();
 		pack.createDATApacket((short) firstBlock.length, (short) 1, firstBlock);
 
+		connections.send(connectionId, pack);
 	}
 	
 	
@@ -81,7 +77,7 @@ public class dataHandler {
 	public void addToFileUploading(byte[] data) {
 		if(data.length > 512){
 			throw new RuntimeException("Data packet size above Maximum");
-		} else if(data.length < 512) {
+		} else if(data.length == 512) {
 			this.devidedDataQueue.add(data);
 		} else {
 			this.devidedDataQueue.add(data);
@@ -92,14 +88,15 @@ public class dataHandler {
 	// uploads the file, sends a broadcast of it and resets the class
 	private void uploadFile() {
 		byte[] bytes = this.turnQueueToBytes();
-		Path path = Paths.get("./files/",this.fileName);
+		Path path = Paths.get("./Files/",this.fileName);
 	    try {
 			Files.write(path, bytes);
 		} catch (IOException e) {
-			System.out.println("coundn't write file");
+			System.out.println("coundn't write file");//TODO error
 			e.printStackTrace();
 		}		Packet pack = new Packet();
 		pack.createBCASTpacket(true, fileName);
+		connections.send(connectionId, pack);
 		this.reset();		
 	}
 
@@ -128,7 +125,7 @@ public class dataHandler {
 		pack.createDATApacket((short) data.length, (short) this.countOfblockExpected, data);
 		this.connections.send(connectionId, pack);
 		this.countOfblockExpected++;
-		
+		//TODO init if it is the last data pack
 	}
 
 	
