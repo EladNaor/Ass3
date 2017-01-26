@@ -147,6 +147,10 @@ public class Packet {
 	public short getPacketSize(){
 		return this.packetSize;
 	}
+
+	public byte[] getData() {
+		return this.data;
+	}
 	
 	
 	
