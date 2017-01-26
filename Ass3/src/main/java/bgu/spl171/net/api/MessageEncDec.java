@@ -23,7 +23,8 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
     private short blockNumber;
     private byte[] bytesOfDataPacketSize = new byte[2];
     private byte[] bytesOfBlockNumber = new byte[2];
-    private byte[] data=new byte[512];
+    private ByteBuffer data= ByteBuffer.allocate(512);
+
 
     //for ERROR Packets
     private int k=0;
@@ -33,6 +34,9 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
     //For Encoder
     private byte[] ans;
 
+    //For BCAST Packet
+    private boolean delOrAdd=false;
+
 
     public void errorInit(){
         k=0;
@@ -41,6 +45,7 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
 
     public void init(){
         p=null;
+        delOrAdd=false;
         bytesOfOpCode = new byte[2];
         i=0;
         byteBuffer = ByteBuffer.allocate(512);
@@ -51,7 +56,7 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
         counter=0;
         bytesOfDataPacketSize = new byte[2];
         bytesOfBlockNumber = new byte[2];
-        data=new byte[512];
+        data=ByteBuffer.allocate(512);
     }
     @Override
     public Packet decodeNextByte(byte nextByte) {
@@ -126,12 +131,12 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
                     }
                 } else {
                     if (counter <= packetSize) {
-                        data[counter] = nextByte;
+                        data.put(nextByte);
                         counter++;
 
                         if (counter == packetSize) {
                             p = new Packet();
-                            p.createDATApacket(packetSize, blockNumber, data);
+                            p.createDATApacket(packetSize, blockNumber, byteBufferToChar(data).getBytes());
                             dataInit();
                             opCode=0;
                             return p;
@@ -209,7 +214,25 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
                 }
             }
 
-
+            case 9:{
+                if(j==0 && nextByte==1){
+                    delOrAdd=true;
+                    j++;
+                    return null;
+                }
+                if(nextByte!=0) {
+                    byteBuffer.put(nextByte);
+                    return null;
+                }
+                else {
+                    String fileName = byteBufferToChar(byteBuffer);
+                    p=new Packet();
+                    p.createBCASTpacket(delOrAdd,fileName);
+                    opCode=0;
+                    j=0;
+                    return p;
+                }
+            }
         }
         return null;
     }
@@ -243,18 +266,66 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
                 break;
             }
 
+            case 3:{
+                ans = new byte[message.getPacketSize()+6];
+                ans[0] = opCodeBytes[0];
+                ans[1] = opCodeBytes[1];
+                byte[] temp=shortToBytes(message.getPacketSize());
+                ans[2]=temp[0];
+                ans[3]=temp[1];
+                temp=shortToBytes(message.getBlockNumber());
+                ans[4]=temp[0];
+                ans[5]=temp[1];
+                temp=message.getData();
+                for(int i=6; i<temp.length+6; i++)
+                    ans[i]=temp[i-6];
+                break;
+            }
+
+            case 4:{
+                ans=new byte[4];
+                ans[0] = opCodeBytes[0];
+                ans[1] = opCodeBytes[1];
+                byte[] temp=shortToBytes(message.getBlockNumber());
+                ans[2] = temp[0];
+                ans[3] = temp[1];
+                break;
+            }
+
+            case 5:{
+                ans = new byte[message.getString().getBytes().length + 5];
+                ans[0] = opCodeBytes[0];
+                ans[1] = opCodeBytes[1];
+                ans[ans.length - 1] = 0;
+                byte[] temp=shortToBytes(message.getErrCode());
+                ans[2]=temp[0];
+                ans[3]=temp[1];
+                byte[] string = message.getString().getBytes();
+                for (int i = 4; i < string.length + 4; i++)
+                    ans[i] = string[i - 4];
+                break;
+            }
+
             case 6: case 10:{
                 ans=opCodeBytes;
                 break;
             }
 
-            case 3:{
-                ans = new byte[message.getPacketSize()+ 3];
-
+            case 9:{
+                ans = new byte[message.getString().getBytes().length + 4];
+                ans[0] = opCodeBytes[0];
+                ans[1] = opCodeBytes[1];
+                ans[ans.length - 1] = 0;
+                if(message.getAddedOrDeleted())
+                    ans[2]=1;
+                else
+                    ans[2]=0;
+                byte[] string = message.getString().getBytes();
+                for (int i = 3; i < string.length + 3; i++)
+                    ans[i] = string[i - 3];
+                break;
             }
         }
-
-
         return ans;
     }
 

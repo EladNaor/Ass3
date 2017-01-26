@@ -63,7 +63,9 @@ public class Packet {
 		this.opcode=3;
 		this.packetSize=packetSize;
 		this.blockNumber=blockNumber;
-		this.data=data;
+		this.data = new byte[data.length];
+		for(int i=0; i<this.data.length; i++)
+			this.data[i]=data[i];
 		this.endByte = true;
 	}
 	
@@ -148,11 +150,28 @@ public class Packet {
 		return this.packetSize;
 	}
 
+<<<<<<< HEAD
 	public byte[] getData() {
 		return this.data;
 	}
 	
 	
 	
+=======
+	public byte[] getData(){
+		return this.data;
+	}
+
+	public short getErrCode(){
+		return this.errCode;
+	}
+
+	public boolean getAddedOrDeleted(){
+		return this.addedOrDeleted;
+	}
+
+
+
+>>>>>>> branch 'master' of https://github.com/EladNaor/Ass3
 }
 
