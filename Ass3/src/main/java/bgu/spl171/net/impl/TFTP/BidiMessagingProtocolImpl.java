@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Stream;
+
 import java.nio.file.Path;
 
 import bgu.spl171.net.api.bidi.BidiMessagingProtocol;
@@ -19,15 +20,10 @@ import bgu.spl171.net.srv.bidi.ConnectionHandler;
 public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>{
 	private int connectionId;
 	private ConnectionHandler<Packet> handler;
-	private short countOfblockExpected = 0;
-	private ConcurrentLinkedQueue<byte[]> devidedDataQueue;
 	private static HashMap<Integer, String> logedInUsersMap;
-	private static final File FilesDir = new File("./Files");
+	private static final File FilesDir = new File("/Files");
 	
-	//only options are: read, write, dirq, rest
-	private String action = "rest"; 
-
-	
+	private dataHandler dataHandler;
 	private static Connections<Packet> connections;
 	
 	@Override
@@ -38,50 +34,63 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 
 	@Override
 	public void process(Packet message) {
+		//TODO wrap with verification that user is logged in  
 		short opCode = message.getOpCode();
 		Packet pack = new Packet();
 		byte[] rawData = null;
-		
 		switch(opCode){
+		
+		//RRQ- read
 		case 1:
+			File wfile = new File(FilesDir+"/"+message.getString());
 			try {
-				Path path = Paths.get(FilesDir+"/"+message.getString());
-				rawData = Files.readAllBytes(path);
+				rawData = Files.readAllBytes(wfile.toPath());
 			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			if(!wfile.exists()){
 				pack.createERRORpacket((short)1,"1");
 				this.connections.send(this.connectionId, pack);
-			}
-			if(rawData.length <= 512){
-				pack.createDATApacket((short) rawData.length, (short) 1, rawData);
 			} else {
-				byte[] firstBlock = this.devideRawDataIntoBlocksAndGetFirst(rawData);
-				pack.createDATApacket((short) firstBlock.length, (short) 1, firstBlock);
+				this.dataHandler = new dataHandler("reading", message.getString(), this.connections);
+				this.dataHandler.devideRawDataIntoBlocksAndSendFirst(rawData);
 			}
 			this.connections.send(this.connectionId, pack);
 			break;
 			
+		//WRQ -write
 		case 2:
-			File file = new File(message.getString());
+			File file = new File(FilesDir+"/"+message.getString());
 			if(file.exists()){
 				pack.createERRORpacket((short)5,"5");
 				this.connections.send(this.connectionId, pack);
 			}
 			pack.createACKpacket((short) 0);
 			this.connections.send(this.connectionId, pack);
+			this.dataHandler.setAction("writing");
 			break;
 			
-		case 3: // TODO understand what to do with data received
-			// also remember to BCAST int the end 
-
+			//DATA 
+		case 3: 
+			if(this.dataHandler.getAction().equals("write")){
+				short blockCount = dataHandler.getAndIncCountOfblockExpected();
+				dataHandler.addToFileUploading(message.getData());
+				pack.createACKpacket(blockCount);
+				this.connections.send(4, pack);
+			} else throw new RuntimeException("protocol trying to do more than one action at the same time");
 			
+
+			//ACK
 		case 4:
-			if(!(message.getBlockNumber() == this.countOfblockExpected)){
+			if(!(message.getBlockNumber() == this.dataHandler.getAndIncCountOfblockExpected())){
 				pack.createERRORpacket((short)1,"1");
 				break;
 			}
 			
-		case 5: //TODO what to do when client sends an error
-			
+			//ERROR
+		case 5: this.dataHandler.reset();
+		
+			//DIRQ
 		case 6: 
 			String dirList = new String("");
 			
@@ -95,11 +104,10 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 			if(rawData.length <= 512){
 				pack.createDATApacket((short) rawData.length, (short) 1, rawData);
 			} else {
-				byte[] firstBlock = this.devideRawDataIntoBlocksAndGetFirst(rawData);
-				pack.createDATApacket((short) firstBlock.length, (short) 1, firstBlock);
+				this.dataHandler.devideRawDataIntoBlocksAndSendFirst(rawData);
 			}
 			connections.send(3,pack);
-
+			//LOGRQ
 		case 7:
 			String userName = message.getString();
 			if(logedInUsersMap.containsValue(userName)){
@@ -109,7 +117,8 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 				logedInUsersMap.put(this.connectionId, userName);
 				pack.createACKpacket((short) 0);
 			}
-		
+			break;
+		//DELRQ
 		case 8: 
 			Path path = Paths.get(FilesDir+"/"+message.getString());
 			if(!path.toFile().exists()){
@@ -120,24 +129,17 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 				pack.createBCASTpacket(false, message.getString());
 				connections.send(9, pack);
 			}
+			break;
 			
+			//DISC
 		case 10:
 			logedInUsersMap.remove(this.connectionId);
 			this.connections.disconnect(connectionId);
+			break;
 		}
 	}
 
-	private byte[] devideRawDataIntoBlocksAndGetFirst(byte[] rawData) {
-		int sumOfBlocks = (int) Math.ceil(rawData.length/512);
-		for(int i = 0; i< sumOfBlocks; i++){
-			byte[] dataBlock = new byte[512];
-			for(int j = 0; j< 512; j++){
-				dataBlock[j] = rawData[512*i +j]; 
-			}
-			this.devidedDataQueue.add(dataBlock);
-		}
-		return this.devidedDataQueue.poll();
-	}
+
 
 	@Override
 	public boolean shouldTerminate() {
