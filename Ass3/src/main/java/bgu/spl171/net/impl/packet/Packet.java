@@ -149,15 +149,7 @@ public class Packet {
 	public short getPacketSize(){
 		return this.packetSize;
 	}
-
-<<<<<<< HEAD
-	public byte[] getData() {
-		return this.data;
-	}
 	
-	
-	
-=======
 	public byte[] getData(){
 		return this.data;
 	}
@@ -170,8 +162,5 @@ public class Packet {
 		return this.addedOrDeleted;
 	}
 
-
-
->>>>>>> branch 'master' of https://github.com/EladNaor/Ass3
 }
 

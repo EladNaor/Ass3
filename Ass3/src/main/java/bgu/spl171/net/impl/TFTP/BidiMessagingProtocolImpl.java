@@ -45,14 +45,14 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 			String userName = message.getString();
 			if(logedInUsersMap.containsKey(this.connectionId) 
 					|| logedInUsersMap.containsValue(userName)){
-				pack.createERRORpacket((short) 7, pack.getString());
+				pack.createERRORpacket((short) 7, "7");
 				connections.send(connectionId, pack);
 			} else {
 				logedInUsersMap.put(this.connectionId, userName);
 				pack.createACKpacket((short) 0);
 			}
 		} else if(!logedInUsersMap.containsKey(this.connectionId)){
-			pack.createERRORpacket((short) 7, pack.getString());
+			pack.createERRORpacket((short) 7, "");
 			this.connections.send(5, pack);
 		}
 		//check what type of packet he got and acts accordingly
