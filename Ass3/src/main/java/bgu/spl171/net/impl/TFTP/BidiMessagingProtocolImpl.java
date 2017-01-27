@@ -113,7 +113,7 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 			case 6: 
 				String dirList = new String("");
 				
-				File allFiles = new File("./Files"); // directory of the files folder
+				File allFiles = new File("/Files"); // directory of the files folder
 				File[] allFilesArray = allFiles.listFiles();
 				for(File fileName: allFilesArray){
 					if(!fileUploading.containsValue(fileName)){

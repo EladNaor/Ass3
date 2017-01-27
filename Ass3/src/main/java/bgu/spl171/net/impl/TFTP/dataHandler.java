@@ -87,7 +87,7 @@ public class dataHandler {
 	// uploads the file, sends a broadcast of it and resets the class
 	private void uploadFile() {
 		byte[] bytes = this.turnQueueToBytes();
-		Path path = Paths.get("./Files/",this.fileName);
+		Path path = Paths.get("/Files/",this.fileName);
 	    try {
 			Files.write(path, bytes);
 		} catch (IOException e) {
