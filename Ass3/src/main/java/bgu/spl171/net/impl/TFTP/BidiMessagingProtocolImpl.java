@@ -142,6 +142,8 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 				logedInUsersMap.remove(this.connectionId);
 				this.connections.disconnect(connectionId);
 				this.shouldTerminate = true;
+				pack.createACKpacket((short) 0);
+				connections.send(connectionId, pack);
 				break;
 				
 				default:
