@@ -60,7 +60,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
 	public void send(T msg) {
 		
 		try{
-			
+			out = new BufferedOutputStream(sock.getOutputStream());
 			this.out.write(this.encdec.encode(msg));;
 			out.flush();
 		}
