@@ -147,7 +147,7 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 				}
 				break;
 				
-				//DISC
+				// DISC
 			case 10:
 				logedInUsersMap.remove(this.connectionId);
 				connections.disconnect(connectionId);
