@@ -5,8 +5,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.management.RuntimeErrorException;
 
@@ -18,19 +19,20 @@ public class dataHandler {
 	private String action;
 	private short countOfblockExpected;
 	private ConcurrentLinkedQueue<byte[]> devidedDataQueue;
-	private static HashMap<Integer, String> fileUploading;
+	private static ConcurrentMap<Integer, String> fileUploading;
 	private String fileName;
 	private static Connections<Packet> connections;
 
 	
-	public dataHandler(String action, String fileName, Connections<Packet> connections, HashMap<Integer, String> fileUploading){
+	public dataHandler(String action, String fileName, Connections<Packet> pConnections, int connId, ConcurrentMap<Integer, String> pFileUploading){
 		this.action = action;
+		this.connectionId = connId;
 		this.fileName = fileName;
 		this.countOfblockExpected = 0;
 		this.devidedDataQueue = new ConcurrentLinkedQueue<byte[]>();
-		this.fileUploading = fileUploading;
-		this.fileUploading.put(connectionId, fileName);
-		this.connections = connections;
+		fileUploading = pFileUploading;
+		pFileUploading.put(connectionId, fileName);
+		connections = pConnections;
 		
 		
 	}
@@ -39,14 +41,12 @@ public class dataHandler {
 		return this.action;
 	}
 	
-	protected void devideRawDataIntoBlocksAndSendFirst(byte[] rawData) {
+	public void devideRawDataIntoBlocksAndSendFirst(byte[] rawData) {
 		int sumOfBlocks = (int) Math.ceil((rawData.length +1)/512);
 		short rem = (short) (rawData.length%512);
 		for(int i = 0; i< sumOfBlocks-1; i++){
 			byte[] dataBlock = new byte[512];
-			for(int j = 0; j< 512; j++){
-				dataBlock[j] = rawData[512*i +j]; 
-			}
+			System.arraycopy(rawData, 512 * i + 0, dataBlock, 0, 512);
 			this.devidedDataQueue.add(dataBlock);
 		}
 		//last packet sent can't be 512 bytes long
@@ -61,13 +61,11 @@ public class dataHandler {
 		connections.send(connectionId, pack);
 	}
 	
-	
-	
-	protected void reset(){
+	public void reset(){
 		this.action = "resting";
 		this.countOfblockExpected = 0;
 		this.devidedDataQueue.clear();
-		this.fileUploading.remove(fileName);
+		fileUploading.remove(connectionId);
 		this.fileName = "empty";
 	}
 
@@ -87,7 +85,7 @@ public class dataHandler {
 	// uploads the file, sends a broadcast of it and resets the class
 	private void uploadFile() {
 		byte[] bytes = this.turnQueueToBytes();
-		Path path = Paths.get("/Files/",this.fileName);
+		Path path = Paths.get("./Files/",this.fileName);
 	    try {
 			Files.write(path, bytes);
 		} catch (IOException e) {
@@ -109,8 +107,8 @@ public class dataHandler {
 		int next = 0;
 		while(!devidedDataQueue.isEmpty()){
 			byte[] dataBlock =this.devidedDataQueue.poll();
-			for(int i = 0; i< dataBlock.length; i++){
-				fileBytes[next] = dataBlock[i];
+			for (byte aDataBlock : dataBlock) {
+				fileBytes[next] = aDataBlock;
 				next++;
 			}
 		}
@@ -121,13 +119,13 @@ public class dataHandler {
 		this.action= string;
 	}
 
-	protected void sendNext() {
+	public void sendNext() {
 		if(!devidedDataQueue.isEmpty())
 		{
 			byte[] data = this.devidedDataQueue.poll();
 			Packet pack = new Packet();
 			pack.createDATApacket((short) data.length, (short) this.countOfblockExpected, data);
-			this.connections.send(connectionId, pack);
+			connections.send(connectionId, pack);
 			this.countOfblockExpected++;
 		} else {
 			this.reset();

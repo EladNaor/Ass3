@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
 
 import java.nio.file.Path;
@@ -19,18 +21,18 @@ import bgu.spl171.net.srv.bidi.ConnectionHandler;
 
 public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>{
 	private int connectionId;
-	private static HashMap<Integer, String> logedInUsersMap;
+	private static ConcurrentMap<Integer, String> logedInUsersMap = new ConcurrentHashMap<>();
 	private static final File FilesDir = new File("/Files");
-	private static HashMap<Integer, String> fileUploading;
+	private static ConcurrentMap<Integer, String> fileUploading = new ConcurrentHashMap<>();
 	
 	private dataHandler dataHandler;
 	private boolean shouldTerminate = false;
 	private static Connections<Packet> connections;
 	
 	@Override
-	public void start(int connectionId, Connections connections) {
+	public void start(int connectionId, Connections<Packet> pConnections) {
 		this.connectionId=connectionId;
-		this.connections=connections;
+		connections=pConnections;
 	}
 
 	@Override
@@ -50,10 +52,11 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 			} else {
 				logedInUsersMap.put(this.connectionId, userName);
 				pack.createACKpacket((short) 0);
+				connections.send(connectionId,pack);
 			}
 		} else if(!logedInUsersMap.containsKey(this.connectionId)){
 			pack.createERRORpacket((short) 7, "");
-			this.connections.send(5, pack);
+			connections.send(5, pack);
 		}
 		//check what type of packet he got and acts accordingly
 		else {
@@ -70,9 +73,9 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 				}
 				if(!wfile.exists()){
 					pack.createERRORpacket((short)1,"1");
-					this.connections.send(this.connectionId, pack);
+					connections.send(this.connectionId, pack);
 				} else {
-					this.dataHandler = new dataHandler("reading", message.getString(), this.connections, this.fileUploading);
+					this.dataHandler = new dataHandler("reading", message.getString(), connections, connectionId, fileUploading);
 					this.dataHandler.devideRawDataIntoBlocksAndSendFirst(rawData);
 				}
 				break;
@@ -82,11 +85,11 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 				File file = new File(FilesDir+"/"+message.getString());
 				if(file.exists()){
 					pack.createERRORpacket((short)5,"5");
-					this.connections.send(this.connectionId, pack);
+					connections.send(this.connectionId, pack);
 				} else {
 				pack.createACKpacket((short) 0);
-				this.connections.send(this.connectionId, pack);
-				this.dataHandler = new dataHandler("writing", message.getString(), this.connections, this.fileUploading);
+				connections.send(this.connectionId, pack);
+				this.dataHandler = new dataHandler("writing", message.getString(), connections,connectionId, fileUploading);
 				}
 				break;
 				
@@ -95,10 +98,10 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 				if(this.dataHandler.getAction().equals("writing")){
 					dataHandler.addToFileUploading(message.getData());
 					pack.createACKpacket(message.getBlockNumber());
-					this.connections.send(connectionId, pack);
+					connections.send(connectionId, pack);
 				} else {
 					pack.createERRORpacket((short)5,"protocol trying to write and do another action at the same time");
-				this.connections.send(this.connectionId, pack);
+				connections.send(this.connectionId, pack);
 				}
 	
 				//ACK
@@ -111,36 +114,43 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 			
 				//DIRQ
 			case 6: 
-				String dirList = new String("");
+				String dirList = "";
 				
-				File allFiles = new File("/Files"); // directory of the files folder
+				File allFiles = new File("./Files"); // directory of the files folder
 				File[] allFilesArray = allFiles.listFiles();
-				for(File fileName: allFilesArray){
-					if(!fileUploading.containsValue(fileName)){
-						dirList= dirList+"\n"+fileName.getName();
+				if (allFilesArray!= null && allFilesArray.length > 0) {
+					for (File fileName : allFilesArray) {
+						if (!fileUploading.containsValue(fileName.getName())) {
+							dirList = dirList + "\n" + fileName.getName();
+						}
 					}
+					rawData = dirList.getBytes();
+					this.dataHandler = new dataHandler("dirq", "", connections, connectionId, fileUploading);
+					this.dataHandler.devideRawDataIntoBlocksAndSendFirst(rawData);
 				}
-				rawData = dirList.getBytes();
-				this.dataHandler = new dataHandler("dirq", "", this.connections, this.fileUploading);
-				this.dataHandler.devideRawDataIntoBlocksAndSendFirst(rawData);
-				
 			//DELRQ
 			case 8: 
 				Path path = Paths.get(FilesDir+"/"+message.getString());
 				if(!path.toFile().exists()){
 					pack.createERRORpacket((short)1,"1");
-					this.connections.send(this.connectionId, pack);
+					connections.send(this.connectionId, pack);
 				} else { 
-					path.toFile().delete();
-					pack.createBCASTpacket(false, message.getString());
-					connections.send(connectionId, pack);
+					if(path.toFile().delete()) {
+						pack.createBCASTpacket(false, message.getString());
+						connections.send(connectionId, pack);
+					}
+					else
+					{
+						pack.createERRORpacket((short) 1, "");
+						connections.send(connectionId, pack);
+					}
 				}
 				break;
 				
 				//DISC
 			case 10:
 				logedInUsersMap.remove(this.connectionId);
-				this.connections.disconnect(connectionId);
+				connections.disconnect(connectionId);
 				this.shouldTerminate = true;
 				pack.createACKpacket((short) 0);
 				connections.send(connectionId, pack);
@@ -148,7 +158,7 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 				
 				default:
 					pack.createERRORpacket((short)4,"4");
-					this.connections.send(this.connectionId, pack);
+					connections.send(this.connectionId, pack);
 					
 					break;
 			
