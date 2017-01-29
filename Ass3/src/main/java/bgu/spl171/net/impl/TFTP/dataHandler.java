@@ -42,7 +42,7 @@ public class dataHandler {
 	}
 	
 	public void devideRawDataIntoBlocksAndSendFirst(byte[] rawData) {
-		int sumOfBlocks = (int) Math.ceil((rawData.length +1)/512);
+		int sumOfBlocks = (int) Math.ceil((double)(rawData.length +1)/512);
 		short rem = (short) (rawData.length%512);
 		for(int i = 0; i< sumOfBlocks-1; i++){
 			byte[] dataBlock = new byte[512];
@@ -53,8 +53,8 @@ public class dataHandler {
 			byte[] dataBlock = new byte[rem];
 			for(int j = 0; j< dataBlock.length; j++){
 				dataBlock[j] = rawData[512*(sumOfBlocks-1) +j];
-			this.devidedDataQueue.add(dataBlock);
 		}
+		this.devidedDataQueue.add(dataBlock);
 		Packet pack = new Packet();
 		byte[] firstBlock = this.devidedDataQueue.poll();
 		pack.createDATApacket((short) firstBlock.length, (short) 1, firstBlock);

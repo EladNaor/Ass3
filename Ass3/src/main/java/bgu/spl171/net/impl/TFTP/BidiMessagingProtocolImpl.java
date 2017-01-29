@@ -22,7 +22,7 @@ import bgu.spl171.net.srv.bidi.ConnectionHandler;
 public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>{
 	private int connectionId;
 	private static ConcurrentMap<Integer, String> logedInUsersMap = new ConcurrentHashMap<>();
-	private static final File FilesDir = new File("/Files");
+	private static final File FilesDir = new File("Ass3/Files/");
 	private static ConcurrentMap<Integer, String> fileUploading = new ConcurrentHashMap<>();
 	
 	private dataHandler dataHandler;
