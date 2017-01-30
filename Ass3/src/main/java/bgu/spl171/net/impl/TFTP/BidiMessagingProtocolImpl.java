@@ -143,6 +143,9 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 					connections.send(this.connectionId, pack);
 				} else { 
 					if(path.toFile().delete()) {
+						Packet a = new Packet();
+						a.createACKpacket((short) 0);
+						connections.send(connectionId, a);
 						pack.createBCASTpacket(false, message.getString());
 						for (Map.Entry<Integer, String> entry : logedInUsersMap.entrySet()) {
 							connections.send(entry.getKey(), pack);
