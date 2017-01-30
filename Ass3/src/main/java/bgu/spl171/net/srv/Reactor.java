@@ -104,7 +104,7 @@ public class Reactor<T> implements Server<T> {
         BidiMessagingProtocol<T> BMessagingProtocol = protocolFactory.get();
         final NonBlockingConnectionHandler handler = new NonBlockingConnectionHandler(
                 readerFactory.get(),
-                protocolFactory.get(),
+                BMessagingProtocol,
                 clientChan,
                 this);
         connections.addConnection(handler);
