@@ -57,6 +57,7 @@ public class dataHandler {
 		this.devidedDataQueue.add(dataBlock);
 		Packet pack = new Packet();
 		byte[] firstBlock = this.devidedDataQueue.poll();
+		this.countOfblockExpected++;
 		pack.createDATApacket((short) firstBlock.length, (short) 1, firstBlock);
 		connections.send(connectionId, pack);
 	}

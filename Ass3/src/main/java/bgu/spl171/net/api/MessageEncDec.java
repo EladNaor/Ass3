@@ -267,7 +267,7 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
             }
 
             case 3:{
-                ans = new byte[message.getPacketSize()+6];
+                ans = new byte[(message.getPacketSize() ==0 ? 1 : message.getPacketSize()) +6];
                 ans[0] = opCodeBytes[0];
                 ans[1] = opCodeBytes[1];
                 byte[] temp=shortToBytes(message.getPacketSize());
@@ -279,6 +279,8 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
                 temp=message.getData();
                 for(int i=6; i<temp.length+6; i++)
                     ans[i]=temp[i-6];
+                if (message.getPacketSize()==0)
+                    ans[ans.length-1] = 0;
                 break;
             }
 

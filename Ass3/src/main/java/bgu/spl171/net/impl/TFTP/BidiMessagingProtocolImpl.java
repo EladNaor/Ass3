@@ -22,7 +22,7 @@ import bgu.spl171.net.srv.bidi.ConnectionHandler;
 public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>{
 	private int connectionId;
 	private static ConcurrentMap<Integer, String> logedInUsersMap = new ConcurrentHashMap<>();
-	private static final File FilesDir = new File("Ass3/Files/");
+	private static final File FilesDir = new File("Ass3/Files");
 	private static ConcurrentMap<Integer, String> fileUploading = new ConcurrentHashMap<>();
 	
 	private dataHandler dataHandler;
@@ -67,16 +67,17 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 				File wfile = new File(FilesDir+"/"+message.getString());
 				try {
 					rawData = Files.readAllBytes(wfile.toPath());
-				} catch (IOException e) {
-					System.out.println("coudn't turn files into bytes");
-					e.printStackTrace();
-				}
 				if(!wfile.exists()){
 					pack.createERRORpacket((short)1,"1");
 					connections.send(this.connectionId, pack);
 				} else {
 					this.dataHandler = new dataHandler("reading", message.getString(), connections, connectionId, fileUploading);
 					this.dataHandler.devideRawDataIntoBlocksAndSendFirst(rawData);
+				}
+
+				} catch (IOException e) {
+					pack.createERRORpacket((short)2,"2");
+					connections.send(this.connectionId, pack);
 				}
 				break;
 				
