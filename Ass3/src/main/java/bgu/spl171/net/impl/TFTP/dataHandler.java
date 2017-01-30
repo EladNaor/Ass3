@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
@@ -86,7 +87,7 @@ public class dataHandler {
 	// uploads the file, sends a broadcast of it and resets the class
 	private void uploadFile() {
 		byte[] bytes = this.turnQueueToBytes();
-		Path path = Paths.get("./Files/",this.fileName);
+		Path path = Paths.get(BidiMessagingProtocolImpl.FilesDir.getPath(),this.fileName);
 	    try {
 			Files.write(path, bytes);
 		} catch (IOException e) {
@@ -103,17 +104,22 @@ public class dataHandler {
 
 	//turns the queue of all data blocks to 1 array data
 	private byte[] turnQueueToBytes() {
-		short rem = (short) (devidedDataQueue.size()%512);
-		byte[] fileBytes  = new byte[512*(devidedDataQueue.size()-1) + rem];
+		int size = devidedDataQueue.size();
+		byte[] fileBytes  = new byte[512*(devidedDataQueue.size())];
 		int next = 0;
+		short rem =0;
 		while(!devidedDataQueue.isEmpty()){
 			byte[] dataBlock =this.devidedDataQueue.poll();
 			for (byte aDataBlock : dataBlock) {
 				fileBytes[next] = aDataBlock;
 				next++;
 			}
+
+			if (dataBlock.length < 512)
+				rem= (short) dataBlock.length;
 		}
-		return fileBytes;
+
+		return Arrays.copyOfRange(fileBytes,0, 512*(size -1)+rem);
 	}
 
 	protected void setAction(String string) {
