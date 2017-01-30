@@ -136,7 +136,7 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
 
                         if (counter == packetSize) {
                             p = new Packet();
-                            p.createDATApacket(packetSize, blockNumber, byteBufferToChar(data).getBytes());
+                            p.createDATApacket(packetSize, blockNumber, getRealBytes(data));
                             dataInit();
                             opCode=0;
                             return p;
@@ -237,9 +237,17 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
         return null;
     }
 
+    private byte[] getRealBytes(ByteBuffer byteBuffer){
+        byteBuffer.flip();
+        byte[] username=new byte[byteBuffer.limit()];
+        byteBuffer.get(username,0, byteBuffer.limit());
+        return username;
+    }
+
     private String byteBufferToChar(ByteBuffer byteBuffer){
         byteBuffer.flip();
         byte[] username=new byte[byteBuffer.limit()];
+
         for(int i=0; i<username.length; i++)
             username[i]=byteBuffer.get(i);
         String ans= null;

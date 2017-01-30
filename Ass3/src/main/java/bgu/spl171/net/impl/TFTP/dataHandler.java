@@ -1,6 +1,7 @@
 package bgu.spl171.net.impl.TFTP;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,6 +13,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import javax.management.RuntimeErrorException;
 
+import bgu.spl171.net.api.bidi.BidiMessagingProtocol;
 import bgu.spl171.net.api.bidi.Connections;
 import bgu.spl171.net.impl.packet.Packet;
 
@@ -87,19 +89,23 @@ public class dataHandler {
 	// uploads the file, sends a broadcast of it and resets the class
 	private void uploadFile() {
 		byte[] bytes = this.turnQueueToBytes();
-		Path path = Paths.get(BidiMessagingProtocolImpl.FilesDir.getPath(),this.fileName);
-	    try {
-			Files.write(path, bytes);
+		try {
+			FileOutputStream fileOutputStream =
+					new FileOutputStream(BidiMessagingProtocolImpl.FilesDir +"/" +fileName,false);
+			fileOutputStream.write(bytes);
+			fileOutputStream.close();
 		} catch (IOException e) {
 			Packet pack = new Packet();
 			pack.createERRORpacket((short) 1, "couldn't write to disc");
 			connections.send(connectionId, pack);
 			e.printStackTrace();
-		}		Packet pack = new Packet();
+		}
 	    Packet bcast = new Packet();
 		bcast.createBCASTpacket(true, fileName);
-		connections.send(connectionId, pack);
-		this.reset();		
+		for (Map.Entry<Integer, String> entry : BidiMessagingProtocolImpl.logedInUsersMap.entrySet()) {
+			connections.send(entry.getKey(), bcast);
+		}
+		this.reset();
 	}
 
 	//turns the queue of all data blocks to 1 array data

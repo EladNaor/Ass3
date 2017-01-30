@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,7 +24,7 @@ import bgu.spl171.net.srv.bidi.ConnectionHandler;
 
 public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>{
 	private int connectionId;
-	private static ConcurrentMap<Integer, String> logedInUsersMap = new ConcurrentHashMap<>();
+	public static ConcurrentMap<Integer, String> logedInUsersMap = new ConcurrentHashMap<>();
 	public static final File FilesDir = new File("Ass3/Files");
 	private static ConcurrentMap<Integer, String> fileUploading = new ConcurrentHashMap<>();
 	
@@ -99,7 +100,7 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 				//DATA 
 			case 3: 
 				if(this.dataHandler.getAction().equals("writing")){
-					dataHandler.addToFileUploading(message.getData());
+					dataHandler.addToFileUploading(Arrays.copyOfRange(message.getData(), 0, message.getPacketSize()));
 					pack.createACKpacket(message.getBlockNumber());
 					connections.send(connectionId, pack);
 				} else {
