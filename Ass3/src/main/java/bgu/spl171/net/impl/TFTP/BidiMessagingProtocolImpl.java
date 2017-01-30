@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
@@ -141,7 +143,9 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 				} else { 
 					if(path.toFile().delete()) {
 						pack.createBCASTpacket(false, message.getString());
-						connections.send(connectionId, pack);
+						for (Map.Entry<Integer, String> entry : logedInUsersMap.entrySet()) {
+							connections.send(entry.getKey(), pack);
+						}
 					}
 					else
 					{
