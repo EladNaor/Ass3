@@ -45,14 +45,12 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-
     }
 
     @Override
     public void close() throws IOException {
         connected = false;
         sock.close();
-        //this.connections.disconnect(connectionId);
     }
 
 	@Override

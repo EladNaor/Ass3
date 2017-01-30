@@ -153,10 +153,10 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 				// DISC
 			case 10:
 				logedInUsersMap.remove(this.connectionId);
-				connections.disconnect(connectionId);
 				this.shouldTerminate = true;
 				pack.createACKpacket((short) 0);
 				connections.send(connectionId, pack);
+				connections.disconnect(connectionId);
 				break;
 				
 				default:
