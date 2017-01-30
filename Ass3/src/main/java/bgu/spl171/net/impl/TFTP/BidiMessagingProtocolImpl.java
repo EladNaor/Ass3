@@ -103,6 +103,7 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 					pack.createERRORpacket((short)5,"protocol trying to write and do another action at the same time");
 				connections.send(this.connectionId, pack);
 				}
+				break;
 	
 				//ACK
 			case 4: this.dataHandler.sendNext();
@@ -110,23 +111,25 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 				
 				
 				//ERROR
-			case 5: this.dataHandler.reset();
+			case 5: this.dataHandler.reset(); break;
+			
 			
 				//DIRQ
 			case 6: 
 				String dirList = "";
 				
-				File allFiles = new File("./Files"); // directory of the files folder
+				File allFiles = new File("Ass3/Files/"); // directory of the files folder
 				File[] allFilesArray = allFiles.listFiles();
 				if (allFilesArray!= null && allFilesArray.length > 0) {
 					for (File fileName : allFilesArray) {
 						if (!fileUploading.containsValue(fileName.getName())) {
-							dirList = dirList + "\n" + fileName.getName();
+							dirList = dirList + fileName.getName()+ "\n";
 						}
 					}
 					rawData = dirList.getBytes();
 					this.dataHandler = new dataHandler("dirq", "", connections, connectionId, fileUploading);
 					this.dataHandler.devideRawDataIntoBlocksAndSendFirst(rawData);
+					break;
 				}
 			//DELRQ
 			case 8: 

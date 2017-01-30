@@ -1,3 +1,4 @@
+
 package bgu.spl171.net.srv;
 
 import bgu.spl171.net.api.MessageEncoderDecoder;
@@ -51,6 +52,7 @@ public abstract class BaseServer<T> implements Server<T> {
                 execute(handler);
             }
         } catch (IOException ex) {
+        	int i=0;
         }
 
         System.out.println("server closed!!!");
