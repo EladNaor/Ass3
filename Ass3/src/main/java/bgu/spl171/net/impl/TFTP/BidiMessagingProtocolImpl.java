@@ -58,7 +58,7 @@ public class BidiMessagingProtocolImpl implements  BidiMessagingProtocol<Packet>
 				connections.send(connectionId,pack);
 			}
 		} else if(!logedInUsersMap.containsKey(this.connectionId)){
-			pack.createERRORpacket((short) 7, "");
+			pack.createERRORpacket((short) 6, "6");
 			connections.send(connectionId, pack);
 		}
 		//check what type of packet he got and acts accordingly
