@@ -134,7 +134,7 @@ public class MessageEncDec implements MessageEncoderDecoder<Packet> {
                         data.put(nextByte);
                         counter++;
 
-                        if (counter == packetSize) {
+                        if (counter >= packetSize) {
                             p = new Packet();
                             p.createDATApacket(packetSize, blockNumber, getRealBytes(data));
                             dataInit();
